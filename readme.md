@@ -12,3 +12,5 @@ A console-based Student & Course Management System built using Core Java to prac
 ## Documentation
 See the `docs/` folder for:
 - `Setup_Instructions.md` - JDK installation proof and verification
+
+![Class Diagram](docs/class%20diagram.png)
