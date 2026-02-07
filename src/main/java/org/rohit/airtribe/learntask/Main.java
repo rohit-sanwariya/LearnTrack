@@ -1,5 +1,7 @@
 package org.rohit.airtribe.learntask;
 
+import org.rohit.airtribe.learntask.exception.EntityNotFoundException;
+import org.rohit.airtribe.learntask.exception.InvalidInputException;
 import org.rohit.airtribe.learntask.service.StudentService;
 import org.rohit.airtribe.learntask.service.CourseService;
 import org.rohit.airtribe.learntask.service.EnrollmentService;
@@ -9,7 +11,7 @@ import org.rohit.airtribe.learntask.entity.enrollment.Enrollment;
 import java.util.List;
 
 public class Main {
-    static void main() {
+    static void main(String[] args) throws EntityNotFoundException, InvalidInputException {
         System.out.println("=== LearnTrack - Testing Service Classes ===\n");
 
         // Initialize services

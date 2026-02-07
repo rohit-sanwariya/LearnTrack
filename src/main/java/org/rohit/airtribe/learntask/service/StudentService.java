@@ -1,54 +1,77 @@
 package org.rohit.airtribe.learntask.service;
 
 import org.rohit.airtribe.learntask.entity.actors.student.Student;
+import org.rohit.airtribe.learntask.exception.EntityNotFoundException;
+import org.rohit.airtribe.learntask.exception.InvalidInputException;
 import org.rohit.airtribe.learntask.util.IDGenerator;
+import org.rohit.airtribe.learntask.util.InputValidator;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StudentService {
-    // ArrayList to store Student objects (Collection)
     private List<Student> students;
 
-    // Constructor
     public StudentService() {
         this.students = new ArrayList<>();
-        initializeSampleData(); // Optional: add some sample data
+        initializeSampleData();
     }
 
-    // CRUD Operations
+    // Updated methods with exception handling
 
-    // Create - Add new student
-    public Student addStudent(String firstName, String lastName, String email, String batch) {
+    public Student addStudent(String firstName, String lastName, String email, String batch)
+            throws InvalidInputException {
+        // Validate inputs
+        String validatedFirstName = InputValidator.validateNonEmpty(firstName, "First Name");
+        String validatedLastName = InputValidator.validateNonEmpty(lastName, "Last Name");
+        String validatedEmail = InputValidator.validateEmail(email);
+        String validatedBatch = InputValidator.validateNonEmpty(batch, "Batch");
+
         int newId = IDGenerator.getNextStudentId();
-        Student student = new Student(newId, firstName, lastName, email, batch);
+        Student student = new Student(newId, validatedFirstName, validatedLastName, validatedEmail, validatedBatch);
         students.add(student);
         return student;
     }
 
-    // Method overloading example (add student without email)
-    public Student addStudent(String firstName, String lastName, String batch) {
-        int newId = IDGenerator.getNextStudentId();
-        Student student = new Student(newId, firstName, lastName, batch);
-        students.add(student);
-        return student;
-    }
-
-    // Read - Get all students
-    public List<Student> getAllStudents() {
-        return new ArrayList<>(students); // Return copy for encapsulation
-    }
-
-    // Read - Get student by ID
-    public Student getStudentById(int id) {
+    // Method that throws EntityNotFoundException
+    public Student getStudentById(int id) throws EntityNotFoundException {
         for (Student student : students) {
             if (student.getId() == id) {
                 return student;
             }
         }
-        return null; // Student not found
+        throw new EntityNotFoundException("Student", id);
     }
 
-    // Read - Get active students only
+    // Update with exception
+    public boolean updateStudent(int id, String firstName, String lastName, String email, String batch)
+            throws EntityNotFoundException, InvalidInputException {
+
+        Student student = getStudentById(id); // This throws EntityNotFoundException if not found
+
+        // Validate inputs
+        String validatedFirstName = InputValidator.validateNonEmpty(firstName, "First Name");
+        String validatedLastName = InputValidator.validateNonEmpty(lastName, "Last Name");
+        String validatedEmail = InputValidator.validateEmail(email);
+        String validatedBatch = InputValidator.validateNonEmpty(batch, "Batch");
+
+        student.setFirstName(validatedFirstName);
+        student.setLastName(validatedLastName);
+        student.setEmail(validatedEmail);
+        student.setBatch(validatedBatch);
+        return true;
+    }
+
+    public boolean deactivateStudent(int id) throws EntityNotFoundException {
+        Student student = getStudentById(id); // Throws exception if not found
+        student.setActive(false);
+        return true;
+    }
+
+    // Keep old methods without exceptions for backward compatibility
+    public List<Student> getAllStudents() {
+        return new ArrayList<>(students);
+    }
+
     public List<Student> getActiveStudents() {
         List<Student> activeStudents = new ArrayList<>();
         for (Student student : students) {
@@ -59,34 +82,13 @@ public class StudentService {
         return activeStudents;
     }
 
-    // Update - Update student information
-    public boolean updateStudent(int id, String firstName, String lastName, String email, String batch) {
-        Student student = getStudentById(id);
-        if (student != null) {
-            student.setFirstName(firstName);
-            student.setLastName(lastName);
-            student.setEmail(email);
-            student.setBatch(batch);
-            return true;
-        }
-        return false; // Student not found
-    }
-
-    // Delete (soft delete) - Deactivate student
-    public boolean deactivateStudent(int id) {
-        Student student = getStudentById(id);
-        if (student != null) {
-            student.setActive(false);
-            return true;
-        }
-        return false; // Student not found
-    }
-
-    // Search students by name (partial match)
     public List<Student> searchStudentsByName(String name) {
         List<Student> result = new ArrayList<>();
-        String searchTerm = name.toLowerCase();
+        if (name == null || name.trim().isEmpty()) {
+            return result;
+        }
 
+        String searchTerm = name.toLowerCase();
         for (Student student : students) {
             if (student.getFirstName().toLowerCase().contains(searchTerm) ||
                     student.getLastName().toLowerCase().contains(searchTerm)) {
@@ -96,15 +98,17 @@ public class StudentService {
         return result;
     }
 
-    // Get student count
     public int getStudentCount() {
         return students.size();
     }
 
-    // Optional: Initialize with sample data
     private void initializeSampleData() {
-        students.add(new Student(IDGenerator.getNextStudentId(), "Rohit", "Sharma", "rohit@example.com", "BatchA"));
-        students.add(new Student(IDGenerator.getNextStudentId(), "Virat", "Kohli", "virat@example.com", "BatchB"));
-        students.add(new Student(IDGenerator.getNextStudentId(), "MS", "Dhoni", "dhoni@example.com", "BatchC"));
+        try {
+            students.add(new Student(IDGenerator.getNextStudentId(), "Rohit", "Sharma", "rohit@example.com", "BatchA"));
+            students.add(new Student(IDGenerator.getNextStudentId(), "Virat", "Kohli", "virat@example.com", "BatchB"));
+            students.add(new Student(IDGenerator.getNextStudentId(), "MS", "Dhoni", "dhoni@example.com", "BatchC"));
+        } catch (Exception e) {
+            System.err.println("Error initializing sample data: " + e.getMessage());
+        }
     }
 }
