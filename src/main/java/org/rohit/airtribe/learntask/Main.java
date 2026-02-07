@@ -11,7 +11,7 @@ import org.rohit.airtribe.learntask.entity.enrollment.Enrollment;
 import java.util.List;
 
 public class Main {
-    static void main(String[] args) throws EntityNotFoundException, InvalidInputException {
+    static void main() throws EntityNotFoundException, InvalidInputException {
         System.out.println("=== LearnTrack - Testing Service Classes ===\n");
 
         // Initialize services
